@@ -8,7 +8,10 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import urllib.parse
 import yt_dlp
 import logging
-from config import TELEGRAM_TOKEN, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 # Configuración de logging
 logging.basicConfig(
@@ -17,10 +20,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Obtener tokens desde variables de entorno
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+SPOTIFY_CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')
+
+if not all([TELEGRAM_TOKEN, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET]):
+    raise ValueError("Faltan variables de entorno necesarias")
+
 # Directorio de descargas
 DOWNLOAD_PATH = 'downloads'
 
-# Configuración mejorada de yt-dlp
+# Asegurar que existe el directorio de descargas
+if not os.path.exists(DOWNLOAD_PATH):
+    os.makedirs(DOWNLOAD_PATH)
+
+# Configuración de yt-dlp
 ydl_opts = {
     'format': 'bestaudio/best',
     'postprocessors': [{
@@ -32,9 +47,6 @@ ydl_opts = {
     'quiet': True,
     'no_warnings': True,
     'noplaylist': True,
-    'extract_flat': False,
-    'ignoreerrors': False,
-    'logtostderr': False,
     'retries': 5,
     'fragment_retries': 5,
     'http_headers': {
